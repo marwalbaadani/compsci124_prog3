@@ -112,8 +112,9 @@ int kkAlgo(MaxHeap A)
 
     if (A.H.size() == 1)
     {
-        int residual = A.H.at(0);
-        return A.H.at(0);
+        int residual = abs(A.H.at(0));
+        cout << residual << endl;
+        return residual;
     }
 
     // pop first two values from maxHeap
