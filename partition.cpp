@@ -22,21 +22,21 @@ int parent(int i)
     return (floor(i / 2));
 }
 
-void swap(vector<int> *H, int index1, int index2)
+void swap(vector<int> H, int index1, int index2)
 {
 
-    for (int i = 0; i < H->size(); i++)
+    for (int i = 0; i < H.size(); i++)
     {
-        std::cout << H->at(i) << ' ';
+        std::cout << H.at(i) << ' ';
     }
     cout << endl;
-    int temp = H->at(index1);
-    H->at(index1) = H->at(index2);
-    H->at(index2) = temp;
+    int temp = H.at(index1);
+    H.at(index1) = H.at(index2);
+    H.at(index2) = temp;
 
-    for (int i = 0; i < H->size(); i++)
+    for (int i = 0; i < H.size(); i++)
     {
-        std::cout << H->at(i) << ' ';
+        std::cout << H.at(i) << ' ';
     }
     cout << endl;
 }
@@ -47,12 +47,12 @@ void insert(vector<int> H, int v)
     int N = H.size();
     while (H[parent(N)] < H[N] && H[0] != N)
     {
-        swap(&H, H[parent(N)], H[N]);
+        swap(H, H[parent(N)], H[N]);
         N = parent(N);
     }
 }
 
-void maxHeapify(vector<int> *H, int N)
+void maxHeapify(vector<int> H, int N)
 {
     //    make_tuple(left(N), right(N));
     int l = left(N);
@@ -60,7 +60,7 @@ void maxHeapify(vector<int> *H, int N)
 
     int largest = -1;
 
-    if (l < H->size() && H[l] > H[N])
+    if (l < H.size() && H[l] > H[N])
     {
         // cout << "left of " << H[N] << " is" << H[l] << endl;
         // cout << "N = " << N << " and l =" << left(N) << endl;
@@ -71,7 +71,7 @@ void maxHeapify(vector<int> *H, int N)
 
         largest = N;
     }
-    if (r < H->size() && H[r] > H[largest])
+    if (r < H.size() && H[r] > H[largest])
     {
         // cout << "right of " << H[N] << " is" << H[r] << endl;
         largest = r;
@@ -85,21 +85,21 @@ void maxHeapify(vector<int> *H, int N)
     }
 }
 
-void extractMax(vector<int> *H)
+void extractMax(vector<int> H)
 {
-    if (!H->empty())
+    if (!H.empty())
     {
-        int max = H->at(0);
-        H[0] = H[H->size()];
-        H->pop_back(); //size(H) -= 1
+        int max = H.at(0);
+        H[0] = H[H.size()];
+        H.pop_back(); //size(H) -= 1
         maxHeapify(H, 0);
     }
 }
 
-void buildHeap(vector<int> *A)
+void buildHeap(vector<int> A)
 {
 
-    for (int i = floor(A->size() / 2) + 1; i >= 0; i--)
+    for (int i = floor(A.size() / 2) + 1; i >= 0; i--)
     {
         cout << "i " << i << endl;
         maxHeapify(A, i);
@@ -115,11 +115,7 @@ int main(int argc, char **argv)
 
     int arr[] = {10, 81, 3, 600, 4, 700, 9};
     int n = sizeof(arr) / sizeof(arr[0]);
-    vector<int> *a;
-    for (int i = 0; i < n; i++)
-    {
-        a->push_back(arr[0]);
-    }
+    vector<int> a(arr, arr + n);
 
     // sort(vec.begin(), vec.end());
     // reverse(vec.begin(), vec.end());
@@ -133,11 +129,12 @@ int main(int argc, char **argv)
 
     // inFile.close();
 
-    cout << "The vector elements are : ";
+    cout
+        << "The vector elements are : ";
 
-    for (int i = 0; i < a->size(); i++)
+    for (int i = 0; i < a.size(); i++)
     {
-        std::cout << a->at(i) << ' ';
+        std::cout << a.at(i) << ' ';
     }
 
     // now we make a max heap
@@ -146,9 +143,9 @@ int main(int argc, char **argv)
     cout << endl
          << "hoe dont do it : ";
 
-    for (int i = 0; i < a->size(); i++)
+    for (int i = 0; i < a.size(); i++)
     {
-        std::cout << a->at(i) << ' ';
+        std::cout << a.at(i) << ' ';
     }
     cout << endl;
 }
