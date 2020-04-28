@@ -82,14 +82,6 @@ struct MaxHeap
     int extractMax()
     {
         assert(!H.empty());
-<<<<<<< HEAD
-
-        int max = H.at(0);
-        H[0] = H[H.size() - 1];
-        H.pop_back(); //size(H) -= 1
-        maxHeapify(0);
-        return max;
-=======
         if (!H.empty())
         {
             int max = H.at(0);
@@ -98,11 +90,10 @@ struct MaxHeap
             maxHeapify(0);
             return max;
         }
-        else 
+        else
         {
             throw "error";
         }
->>>>>>> 046f17316b8a7751f9bbd74ff45f16120b970a65
     }
 
     void buildHeap()
@@ -116,10 +107,11 @@ struct MaxHeap
     }
 };
 
-int kkAlgo(MaxHeap A) 
+int kkAlgo(MaxHeap A)
 {
 
-    if (A.H.size() == 1) {
+    if (A.H.size() == 1)
+    {
         int residual = A.H.at(0);
         return A.H.at(0);
     }
@@ -172,15 +164,15 @@ int main(int argc, char **argv)
 
     // Close the file
 
-<<<<<<< HEAD
     string line;
     ifstream inFile(file);
     int a;
     while (inFile >> a)
     {
-=======
+        A.push(a);
+    }
+
     A.buildHeap();
-        A.buildHeap();
     for (int i = 0; i < A.H.size(); i++)
     {
         std::cout << A.H.at(i) << ' ';
@@ -196,12 +188,8 @@ int main(int argc, char **argv)
 
     // sort(vec.begin(), vec.end());
     // reverse(vec.begin(), vec.end());
->>>>>>> 046f17316b8a7751f9bbd74ff45f16120b970a65
 
-        A.push(a);
-    }
-
-    inFile.close();
+    // inFile.close();
 
     kkAlgo(A);
 }
