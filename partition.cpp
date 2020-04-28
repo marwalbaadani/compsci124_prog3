@@ -32,11 +32,11 @@ struct MaxHeap
         H[index1] = H[index2];
         H[index2] = temp;
 
-        for (int i = 0; i < H.size(); i++)
-        {
-            std::cout << H.at(i) << ' ';
-        }
-        cout << endl;
+        // for (int i = 0; i < H.size(); i++)
+        // {
+        //     std::cout << H.at(i) << ' ';
+        // }
+        // cout << endl;
     }
 
     void insert(int v)
@@ -77,14 +77,20 @@ struct MaxHeap
         maxHeapify(index);
     }
 
-    void extractMax()
+    int extractMax()
     {
+        assert(!H.empty());
         if (!H.empty())
         {
             int max = H.at(0);
-            H[0] = H[H.size()];
+            H[0] = H[H.size() - 1];
             H.pop_back(); //size(H) -= 1
             maxHeapify(0);
+            return max;
+        }
+        else 
+        {
+            throw "error";
         }
     }
 
@@ -93,11 +99,42 @@ struct MaxHeap
 
         for (int i = floor(H.size() / 2) + 1; i >= 0; i--)
         {
-            cout << "i = " << i << endl;
+            // cout << "i = " << i << endl;
             maxHeapify(i);
         }
     }
 };
+
+int kkAlgo(MaxHeap A) 
+{
+
+    if (A.H.size() == 1) {
+        int residual = A.H.at(0);
+        return A.H.at(0);
+    }
+
+    // pop first two values from maxHeap
+    int val1 = A.extractMax();
+    int val2 = A.extractMax();
+    // subtract the lesser value from the greater values
+    int newVal = val1 - val2;
+    // push that value back into the max heap
+    A.push(newVal);
+    // run maxHeap on the new array
+    A.maxHeapify(A.H.size());
+    // repeat
+    // when array.size == 0, return the new array
+
+    // for testing
+    for (int i = 0; i < A.H.size(); i++)
+    {
+        std::cout << A.H.at(i) << ' ';
+    }
+    cout << endl;
+
+    kkAlgo(A);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -114,6 +151,21 @@ int main(int argc, char **argv)
     A.push(6);
     A.push(5);
 
+    A.buildHeap();
+        A.buildHeap();
+    for (int i = 0; i < A.H.size(); i++)
+    {
+        std::cout << A.H.at(i) << ' ';
+    }
+    cout << endl;
+
+    // pop first two values from maxHeap
+    // subtract the lesser value from the greater values
+    // push that value back into the max heap
+    // run maxHeap on the new array
+    // repeat
+    // when array.size == 0, return the new array
+
     // sort(vec.begin(), vec.end());
     // reverse(vec.begin(), vec.end());
 
@@ -126,12 +178,5 @@ int main(int argc, char **argv)
 
     // inFile.close();
 
-    A.buildHeap();
-
-    // for testing
-    // for (int i = 0; i < A.H.size(); i++)
-    // {
-    //     std::cout << A.H.at(i) << ' ';
-    // }
-    // cout << endl;
+    kkAlgo(A);
 }
