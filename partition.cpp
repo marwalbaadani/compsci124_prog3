@@ -1,7 +1,9 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 #include <cmath>
+#include <random>
 
 using namespace std;
 
@@ -77,15 +79,15 @@ struct MaxHeap
         maxHeapify(index);
     }
 
-    void extractMax()
+    int extractMax()
     {
-        if (!H.empty())
-        {
-            int max = H.at(0);
-            H[0] = H[H.size()];
-            H.pop_back(); //size(H) -= 1
-            maxHeapify(0);
-        }
+        assert(!H.empty());
+
+        int max = H.at(0);
+        H[0] = H[H.size() - 1];
+        H.pop_back(); //size(H) -= 1
+        maxHeapify(0);
+        return max;
     }
 
     void buildHeap()
@@ -100,6 +102,9 @@ struct MaxHeap
 };
 int main(int argc, char **argv)
 {
+    random_device rd;  //Will be used to obtain a seed for the random number engine
+    mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    uniform_int_distribution<> dis(0.0, pow(10, 12));
 
     int flag = atoi(argv[1]);
     int algo = atoi(argv[2]);
@@ -107,24 +112,30 @@ int main(int argc, char **argv)
 
     MaxHeap A;
 
-    A.push(2);
-    A.push(1);
-    A.push(4);
-    A.push(3);
-    A.push(6);
-    A.push(5);
+    // A.push(2);
+    // A.push(1);
+    // A.push(4);
+    // A.push(3);
+    // A.push(6);
+    // A.push(5);
+    ofstream outFile(file);
+    for (int i = 0; i < 100; i++)
+    {
+        outFile << dis(gen) << endl;
+    }
 
-    // sort(vec.begin(), vec.end());
-    // reverse(vec.begin(), vec.end());
+    // Close the file
 
-    // string line;
-    // ifstream inFile(file);
-    // if (inFile.is_open())
-    // {
-    //     cout << "file reading business goes here" << endl;
-    // }
+    string line;
+    ifstream inFile(file);
+    int a;
+    while (inFile >> a)
+    {
 
-    // inFile.close();
+        A.push(a);
+    }
+
+    inFile.close();
 
     A.buildHeap();
 
