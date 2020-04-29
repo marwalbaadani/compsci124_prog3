@@ -130,13 +130,98 @@ int kkAlgo(MaxHeap A)
     // when array.size == 0, return the new array
 
     // for testing
-    for (int i = 0; i < A.H.size(); i++)
-    {
-        std::cout << A.H.at(i) << ' ';
-    }
-    cout << endl;
+    // for (int i = 0; i < A.H.size(); i++)
+    // {
+    //     std::cout << A.H.at(i) << ' ';
+    // }
+    // cout << endl;
 
     kkAlgo(A);
+}
+
+vector<int> randomSignedList()
+{
+    vector<int> S;
+    for (int i = 0; i < 100; i++)
+    {
+        float rando = rand() % 10 + 1;
+        if (rando > 5)
+            S.push_back(-1);
+        else
+            S.push_back(1);
+    }
+    return S;
+}
+
+int rrResidue(vector<int> H, vector<int> S)
+{
+    int sum = 0;
+    for (int i = 0; i < 25000; i++)
+    {
+        sum += H[i] * S[i];
+    }
+    return sum;
+}
+
+vector<int> rrAlgo(vector<int> H)
+{
+    vector<int> S = randomSignedList();
+    int sResidue = rrResidue(H, S);
+
+    for (int i = 0; i < 100; i++)
+    {
+        vector<int> sPrime = randomSignedList();
+        int sPrimeResidue = rrResidue(H, sPrime);
+        if (sPrimeResidue < sResidue)
+            S = sPrime;
+    }
+    return S;
+}
+
+vector<int> randomNList()
+{
+    vector<int> S;
+    for (int i = 0; i < 100; i++)
+    {
+        float rando = rand() % 100 + 1;
+        S.push_back(rando);
+    }
+    return S;
+}
+
+int partitioningResidue(vector<int> H, vector<int> p)
+{
+    vector<int> aPrime;
+    for (int i = 0; i < 100; i++)
+    {
+        aPrime.push_back(0);
+    }
+    for (int j = 0; j < 100; j++)
+    {
+        aPrime[p[j]] = aPrime[p[j]] + H[p[j]];
+    }
+    MaxHeap A;
+    for (int i = 0; i < 100; i++)
+        A.push(aPrime[i]);
+
+    return kkAlgo(A);
+}
+
+int prepartitionedRR(vector<int> H)
+{
+    vector<int> p = randomNList();
+    int residue = partitioningResidue(H, p);
+    for (int i = 0; i < 25000; i++)
+    {
+        vector<int> preP = randomNList();
+        int prePResidue = partitioningResidue(H, preP);
+        if (prePResidue < residue)
+        {
+            p = preP;
+            residue = prePResidue;
+        }
+    }
+    return residue;
 }
 
 int main(int argc, char **argv)
@@ -174,11 +259,11 @@ int main(int argc, char **argv)
     }
 
     A.buildHeap();
-    for (int i = 0; i < A.H.size(); i++)
-    {
-        std::cout << A.H.at(i) << ' ';
-    }
-    cout << endl;
+    // for (int i = 0; i < A.H.size(); i++)
+    // {
+    //     std::cout << A.H.at(i) << ' ';
+    // }
+    // cout << endl;
 
     // pop first two values from maxHeap
     // subtract the lesser value from the greater values
@@ -192,5 +277,6 @@ int main(int argc, char **argv)
 
     // inFile.close();
 
+    vector<int> k = randomSignedList();
     kkAlgo(A);
 }
