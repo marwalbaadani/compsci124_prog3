@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <sstream>
 #include <random>
 
 using namespace std;
@@ -136,7 +137,7 @@ int kkAlgo(MaxHeap A)
     // }
     // cout << endl;
 
-    kkAlgo(A);
+    return kkAlgo(A);
 }
 
 vector<int> randomSignedList()
@@ -144,7 +145,7 @@ vector<int> randomSignedList()
     vector<int> S;
     for (int i = 0; i < 100; i++)
     {
-        float rando = rand() % 10 + 1;
+        int rando = rand() % 10 + 1;
         if (rando > 5)
             S.push_back(-1);
         else
@@ -156,7 +157,7 @@ vector<int> randomSignedList()
 int rrResidue(vector<int> H, vector<int> S)
 {
     int sum = 0;
-    for (int i = 0; i < 25000; i++)
+    for (int i = 0; i < 100; i++)
     {
         sum += H[i] * S[i];
     }
@@ -168,7 +169,7 @@ vector<int> rrAlgo(vector<int> H)
     vector<int> S = randomSignedList();
     int sResidue = rrResidue(H, S);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 25000; i++)
     {
         vector<int> sPrime = randomSignedList();
         int sPrimeResidue = rrResidue(H, sPrime);
@@ -183,7 +184,7 @@ vector<int> randomNList()
     vector<int> S;
     for (int i = 0; i < 100; i++)
     {
-        float rando = rand() % 100 + 1;
+        int rando = rand() % 100 + 1;
         S.push_back(rando);
     }
     return S;
@@ -224,6 +225,96 @@ int prepartitionedRR(vector<int> H)
     return residue;
 }
 
+// A random move on this state space can be defined as follows.
+// Choose two random indices i and j from [1,n] with pi ̸= j and set pi to j.
+void neighborPartitioning(vector<int> *p)
+{
+    int i = rand() % 100 + 1;
+    int j = rand() % 100 + 1;
+    while (i == j)
+        j = rand() % 100 + 1;
+    p->at(i) = j;
+}
+
+int pHillClimbing(MaxHeap H)
+{
+    vector<int> p = randomNList();
+
+    int residue = partitioningResidue(H.H, p);
+    for (int i = 0; i < 25000; i++)
+    {
+        vector<int> p2;
+        for (int i = 0; i < 100; i++)
+        {
+            p2.push_back(p[i]);
+        }
+        int prePResidue = partitioningResidue(H.H, p2);
+        if (prePResidue < residue)
+        {
+            residue = prePResidue;
+            p = p2;
+            if (residue == 0)
+            {
+                break;
+            }
+        }
+    }
+    //   for testing
+    for (int i = 0; i < H.H.size(); i++)
+    {
+        std::cout << H.H.at(i) << ' ';
+    }
+    cout << endl;
+    return residue;
+}
+
+void neighbor(vector<int> *p)
+{
+    for (int i = 0; i < 100; i++)
+    {
+        cout << p->at(i) << endl;
+    }
+    int i = rand() % 100;
+    p->at(i) *= -1;
+    int half = rand() % 10 + 1;
+    if (half > 5)
+    {
+        int j = rand() % 100;
+        while (i == j)
+            j = rand() % 100;
+        cout << "j " << j << endl;
+        p->at(j) *= -1;
+    }
+}
+
+int hillClimbing(MaxHeap H)
+{
+    vector<int> S = randomSignedList();
+    int residue = rrResidue(H.H, S);
+    for (int i = 0; i < 25000; i++)
+    {
+        vector<int> p2;
+        for (int i = 0; i < 100; i++)
+        {
+            p2.push_back(H.H[i]);
+        }
+        for (int i = 0; i < 100; i++)
+        {
+            cout << p2.at(i) << endl;
+        }
+        neighbor(&p2);
+
+        int residueP = rrResidue(H.H, p2);
+        if (residueP < residue)
+        {
+            residue = residueP;
+            S = p2;
+            if (residueP == 0)
+                break;
+        }
+    }
+    return residue;
+}
 int main(int argc, char **argv)
 {
     random_device rd;  //Will be used to obtain a seed for the random number engine
@@ -253,10 +344,12 @@ int main(int argc, char **argv)
     string line;
     ifstream inFile(file);
     int a;
-    while (inFile >> a)
-    {
-        A.push(a);
-    }
+
+    // while (getline(inFile, line))
+    // {
+    //     istringstream ss(line);
+    //     A.push(stol(line));
+    // }
 
     A.buildHeap();
     // for (int i = 0; i < A.H.size(); i++)
@@ -279,4 +372,13 @@ int main(int argc, char **argv)
 
     vector<int> k = randomSignedList();
     kkAlgo(A);
+    // int tester = partitioningResidue(randomNList(), randomNList());
+    // cout << tester << endl;
+    // for (int i = 0; i < tester.size(); i++)
+    // {
+    //     std::cout << tester.at(i) << ' ';
+    // }
+    // cout << endl;
+
+    hillClimbing(A);
 }
