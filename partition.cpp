@@ -207,7 +207,7 @@ vector<int> randomNList()
     vector<int> S;
     for (int i = 0; i < 100; i++)
     {
-        float rando = rand() % 100 + 1;
+        float rando = rand() % 100;
         S.push_back(rando);
     }
     return S;
@@ -215,11 +215,7 @@ vector<int> randomNList()
 
 int partitioningResidue(vector<int> H, vector<int> p)
 {
-    vector<int> aPrime;
-    for (int i = 0; i < 100; i++)
-    {
-        aPrime.push_back(0);
-    }
+    vector<int> aPrime(100);
     for (int j = 0; j < 100; j++)
     {
         aPrime[p[j]] = aPrime[p[j]] + H[p[j]];
@@ -231,20 +227,27 @@ int partitioningResidue(vector<int> H, vector<int> p)
     return kkAlgo(A);
 }
 
-int prepartitionedRR(vector<int> H)
+int prepartitionedRR(MaxHeap A)
 {
     vector<int> p = randomNList();
-    int residue = partitioningResidue(H, p);
+    int residue = partitioningResidue(A.H, p);
     for (int i = 0; i < 25000; i++)
     {
         vector<int> preP = randomNList();
-        int prePResidue = partitioningResidue(H, preP);
+        int prePResidue = partitioningResidue(A.H, preP);
+        if (prePResidue == 0) 
+        {
+            p = preP;
+            residue = prePResidue;
+            break;            
+        }
         if (prePResidue < residue)
         {
             p = preP;
             residue = prePResidue;
         }
     }
+    cout << "smallestResidue: " << residue << endl;
     return residue;
 }
 
@@ -308,5 +311,6 @@ int main(int argc, char **argv)
 
     // vector<int> k = randomSignedList();
     // kkAlgo(A);
-    rrAlgo(A);
+    // rrAlgo(A);
+    prepartitionedRR(A);
 }
