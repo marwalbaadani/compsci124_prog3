@@ -7,8 +7,8 @@
 #include <random>
 
 using namespace std;
-int MAX_ITER = 1;
-int SIZE = 10;
+int MAX_ITER = 25000;
+int SIZE = 100;
 
 struct MaxHeap
 {
@@ -144,7 +144,7 @@ int rrResidue(MaxHeap H, vector<int> S)
     {
         sum += H.H[i] * S[i];
     }
-    cout << "sum: " << sum << endl;
+    // cout << "sum: " << sum << endl;
     return sum;
 }
 
@@ -205,9 +205,8 @@ int partitioningResidue(vector<int> H, vector<int> p)
 
     for (int j = 0; j < SIZE; j++)
     {
-        // @josh... this is so weird why would randomNlist ever return something negative?!!! unless....
         int i = abs(p[j]);
-        aPrime[i] += H[i];
+        aPrime[i] += H[j];
     }
 
     MaxHeap A;
@@ -237,7 +236,7 @@ int prepartitionedRR(MaxHeap A)
             residue = prePResidue;
         }
     }
-    cout << "smallestResidue: " << residue << endl;
+    // cout << "smallestResidue: " << residue << endl;
     return residue;
 }
 
@@ -296,7 +295,7 @@ void neighbor(vector<int> *p)
 int hillClimbing(MaxHeap H)
 {
     vector<int> S = randomSignedList();
-    int residue = rrResidue(H.H, S);
+    int residue = rrResidue(H, S);
     for (int i = 0; i < MAX_ITER; i++)
     {
         vector<int> p2;
@@ -305,7 +304,7 @@ int hillClimbing(MaxHeap H)
             p2.push_back(H.H[i]);
         }
         neighbor(&p2);
-        int residueP = rrResidue(H.H, p2);
+        int residueP = rrResidue(H, p2);
         if (residueP < residue)
         {
             residue = residueP;
@@ -320,7 +319,7 @@ int hillClimbing(MaxHeap H)
 int simulatedAnnealing(MaxHeap H)
 {
     vector<int> S = randomSignedList();
-    int s2 = rrResidue(H.H, S);
+    int s2 = rrResidue(H, S);
     vector<int> s3 = S;
     int s4 = s2;
     for (int i = 0; i < MAX_ITER; i++)
@@ -331,7 +330,7 @@ int simulatedAnnealing(MaxHeap H)
             p2.push_back(s3[i]);
         }
         neighbor(&p2);
-        int residueP = rrResidue(H.H, p2);
+        int residueP = rrResidue(H, p2);
         if (residueP < s4 || (rand() < exp(-(residueP - s4) / ((pow(10, 10) * (pow(0.8, floor(i / 300))))))))
         {
             s3 = p2;
@@ -353,7 +352,7 @@ int simulatedAnnealing(MaxHeap H)
 int prepartitionedSimulatedAnnealing(MaxHeap H)
 {
     vector<int> partitioned = randomNList();
-    int s = rrResidue(H.H, partitioned);
+    int s = rrResidue(H, partitioned);
     vector<int> partitioned2 = partitioned;
     int s2 = s;
     for (int i = 0; i < MAX_ITER; i++)
@@ -440,5 +439,5 @@ int main(int argc, char **argv)
         residue = prepartitionedSimulatedAnnealing(A);
         break;
     }
-    cout << "heres ya residue: " << residue << endl;
+    cout << residue << endl;
 }
