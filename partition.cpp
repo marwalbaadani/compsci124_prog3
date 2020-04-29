@@ -101,7 +101,6 @@ struct MaxHeap
 
         for (int i = floor(H.size() / 2) + 1; i >= 0; i--)
         {
-            // cout << "i = " << i << endl;
             maxHeapify(i);
         }
     }
@@ -112,29 +111,26 @@ int kkAlgo(MaxHeap A)
 
     if (A.H.size() == 1)
     {
-        int residual = abs(A.H.at(0));
-        cout << residual << endl;
-        return residual;
+        int residue = abs(A.H.at(0));
+        cout << "kkAlgo: " << residue << endl;
+        return residue;
     }
 
-    // pop first two values from maxHeap
     int val1 = A.extractMax();
     int val2 = A.extractMax();
-    // subtract the lesser value from the greater values
     int newVal = val1 - val2;
-    // push that value back into the max heap
     A.push(newVal);
-    // run maxHeap on the new array
     A.maxHeapify(A.H.size());
-    // repeat
-    // when array.size == 0, return the new array
 
-    // for testing
-    // for (int i = 0; i < A.H.size(); i++)
-    // {
-    //     std::cout << A.H.at(i) << ' ';
-    // }
-    // cout << endl;
+
+    /* 
+    for testing
+    for (int i = 0; i < A.H.size(); i++)
+    {
+        std::cout << A.H.at(i) << ' ';
+    }
+    cout << endl; 
+    */
 
     kkAlgo(A);
 }
@@ -150,33 +146,61 @@ vector<int> randomSignedList()
         else
             S.push_back(1);
     }
+
     return S;
 }
 
-int rrResidue(vector<int> H, vector<int> S)
+int rrResidue(MaxHeap H, vector<int> S)
 {
     int sum = 0;
-    for (int i = 0; i < 25000; i++)
+    for (int i = 0; i < 100; i++)
     {
-        sum += H[i] * S[i];
+        sum += H.H[i] * S[i];
     }
+    cout << "sum: " << sum << endl;
     return sum;
 }
 
-vector<int> rrAlgo(vector<int> H)
+int rrAlgo(MaxHeap H)
 {
     vector<int> S = randomSignedList();
     int sResidue = rrResidue(H, S);
 
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < 25000; i++)
     {
         vector<int> sPrime = randomSignedList();
         int sPrimeResidue = rrResidue(H, sPrime);
-        if (sPrimeResidue < sResidue)
+        if (sPrimeResidue == 0) 
+        {
             S = sPrime;
+            sResidue = sPrimeResidue;
+            break;            
+        }
+        if (abs(sPrimeResidue) < abs(sResidue))
+        {
+            S = sPrime;
+            sResidue = sPrimeResidue;
+        }
     }
-    return S;
+
+    int bestS = rrResidue(H, S);
+    int bestResidue = abs(bestS);
+    cout << bestResidue << endl;
+
+    /*
+    For testing
+    cout << "The Best S List" << endl;
+    for (int i = 0; i < S.size(); i++)
+    {
+        std::cout << S.at(i) << ' ';
+    }
+    cout << endl; 
+    */
+    return bestResidue;
+
+    //or return S?
 }
+
 
 vector<int> randomNList()
 {
@@ -228,7 +252,7 @@ int main(int argc, char **argv)
 {
     random_device rd;  //Will be used to obtain a seed for the random number engine
     mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    uniform_int_distribution<> dis(0.0, pow(10, 12));
+    uniform_int_distribution<> dis(0.0, pow(10, 12)); 
 
     int flag = atoi(argv[1]);
     int algo = atoi(argv[2]);
@@ -259,11 +283,16 @@ int main(int argc, char **argv)
     }
 
     A.buildHeap();
-    // for (int i = 0; i < A.H.size(); i++)
-    // {
-    //     std::cout << A.H.at(i) << ' ';
-    // }
-    // cout << endl;
+
+    /*
+    For Testing
+    cout << "The list of N numbers to partition" << endl;
+    for (int i = 0; i < A.H.size(); i++)
+    {
+        std::cout << A.H.at(i) << ' ';
+    }
+    cout << endl;
+    */
 
     // pop first two values from maxHeap
     // subtract the lesser value from the greater values
@@ -277,6 +306,7 @@ int main(int argc, char **argv)
 
     // inFile.close();
 
-    vector<int> k = randomSignedList();
-    kkAlgo(A);
+    // vector<int> k = randomSignedList();
+    // kkAlgo(A);
+    rrAlgo(A);
 }
