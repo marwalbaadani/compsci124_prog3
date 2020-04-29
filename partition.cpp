@@ -5,10 +5,16 @@
 #include <cmath>
 #include <sstream>
 #include <random>
+#include <ctime>
+#include <chrono>
+#include <cstdlib>
+
+using namespace std::chrono;
+using namespace std;
 
 using namespace std;
-int MAX_ITER = 1;
-int SIZE = 10;
+int MAX_ITER = 25000;
+int SIZE = 100;
 
 struct MaxHeap
 {
@@ -105,6 +111,12 @@ struct MaxHeap
 
 int kkAlgo(MaxHeap A)
 {
+    // cout << "inside kkalgo" << endl;
+    // for (int i = 0; i < A.H.size(); i++)
+    // {
+    //     cout << A.H[i] << ' ';
+    // }
+    // cout << endl;
     if (A.H.size() == 1)
     {
         int residual = abs(A.H.at(0));
@@ -116,7 +128,6 @@ int kkAlgo(MaxHeap A)
     int newVal = val1 - val2;
     A.push(newVal);
     A.maxHeapify(A.H.size());
-
     // print A.H for testing as needed
 
     return kkAlgo(A);
@@ -144,7 +155,7 @@ int rrResidue(MaxHeap H, vector<int> S)
     {
         sum += H.H[i] * S[i];
     }
-    cout << "sum: " << sum << endl;
+
     return sum;
 }
 
@@ -153,7 +164,7 @@ int rrAlgo(MaxHeap H)
     vector<int> S = randomSignedList();
     int sResidue = rrResidue(H, S);
 
-    for (int i = 0; i < 25000; i++)
+    for (int i = 0; i < MAX_ITER; i++)
     {
         vector<int> sPrime = randomSignedList();
         int sPrimeResidue = rrResidue(H, sPrime);
@@ -172,7 +183,7 @@ int rrAlgo(MaxHeap H)
 
     int bestS = rrResidue(H, S);
     int bestResidue = abs(bestS);
-    cout << bestResidue << endl;
+    // cout << bestResidue << endl;
 
     /*
     For testing
@@ -203,13 +214,28 @@ int partitioningResidue(vector<int> H, vector<int> p)
 {
     vector<int> aPrime(SIZE);
 
+    // cout << "inside p" << endl;
+    // for (int i = 0; i < SIZE; i++)
+    // {
+    //     cout << p[i] << ' ';
+    // }
+    // cout << endl;
+    // for (int i = 0; i < SIZE; i++)
+    // {
+    //     cout << H[i] << ' ';
+    // }
+    // cout << endl;
+
     for (int j = 0; j < SIZE; j++)
     {
-        // @josh... this is so weird why would randomNlist ever return something negative?!!! unless....
-        int i = abs(p[j]);
-        aPrime[i] += H[i];
+        aPrime[p[j]] += H[j];
     }
 
+    // for (int i = 0; i < SIZE; i++)
+    // {
+    //     cout << aPrime[i] << ' ';
+    // }
+    // cout << endl;
     MaxHeap A;
     for (int i = 0; i < SIZE; i++)
         A.push(aPrime[i]);
@@ -225,19 +251,17 @@ int prepartitionedRR(MaxHeap A)
     {
         vector<int> preP = randomNList();
         int prePResidue = partitioningResidue(A.H, preP);
-        if (prePResidue == 0)
-        {
-            p = preP;
-            residue = prePResidue;
-            break;
-        }
         if (prePResidue < residue)
         {
             p = preP;
             residue = prePResidue;
+            if (residue == 0)
+            {
+                break;
+            }
         }
     }
-    cout << "smallestResidue: " << residue << endl;
+    // cout << "smallestResidue: " << residue << endl;
     return residue;
 }
 
@@ -252,7 +276,7 @@ void neighborPartitioning(vector<int> *p)
     p->at(i) = j;
 }
 
-int pHillClimbing(MaxHeap H)
+int prepartitionedHillClimbing(MaxHeap H)
 {
     vector<int> p = randomNList();
 
@@ -288,7 +312,6 @@ void neighbor(vector<int> *p)
         int j = rand() % SIZE;
         while (i == j)
             j = rand() % SIZE;
-
         p->at(j) *= -1;
     }
 }
@@ -296,7 +319,7 @@ void neighbor(vector<int> *p)
 int hillClimbing(MaxHeap H)
 {
     vector<int> S = randomSignedList();
-    int residue = rrResidue(H.H, S);
+    int residue = rrResidue(H, S);
     for (int i = 0; i < MAX_ITER; i++)
     {
         vector<int> p2;
@@ -305,7 +328,7 @@ int hillClimbing(MaxHeap H)
             p2.push_back(H.H[i]);
         }
         neighbor(&p2);
-        int residueP = rrResidue(H.H, p2);
+        int residueP = rrResidue(H, p2);
         if (residueP < residue)
         {
             residue = residueP;
@@ -320,7 +343,7 @@ int hillClimbing(MaxHeap H)
 int simulatedAnnealing(MaxHeap H)
 {
     vector<int> S = randomSignedList();
-    int s2 = rrResidue(H.H, S);
+    int s2 = rrResidue(H, S);
     vector<int> s3 = S;
     int s4 = s2;
     for (int i = 0; i < MAX_ITER; i++)
@@ -331,7 +354,7 @@ int simulatedAnnealing(MaxHeap H)
             p2.push_back(s3[i]);
         }
         neighbor(&p2);
-        int residueP = rrResidue(H.H, p2);
+        int residueP = rrResidue(H, p2);
         if (residueP < s4 || (rand() < exp(-(residueP - s4) / ((pow(10, 10) * (pow(0.8, floor(i / 300))))))))
         {
             s3 = p2;
@@ -353,7 +376,7 @@ int simulatedAnnealing(MaxHeap H)
 int prepartitionedSimulatedAnnealing(MaxHeap H)
 {
     vector<int> partitioned = randomNList();
-    int s = rrResidue(H.H, partitioned);
+    int s = rrResidue(H, partitioned);
     vector<int> partitioned2 = partitioned;
     int s2 = s;
     for (int i = 0; i < MAX_ITER; i++)
@@ -415,30 +438,73 @@ int main(int argc, char **argv)
     }
 
     A.buildHeap();
-    int residue = 0;
-    switch (algo)
+    // int residue = 0;
+    // switch (algo)
+    // {
+    // case 0:
+    //     residue = kkAlgo(A);
+    //     break;
+    // case 1:
+    //     residue = rrAlgo(A);
+    //     break;
+    // case 2:
+    //     residue = hillClimbing(A);
+    //     break;
+    // case 3:
+    //     residue = simulatedAnnealing(A);
+    //     break;
+    // case 11:
+    //     residue = prepartitionedRR(A);
+    //     break;
+    // case 12:
+    //     residue = prepartitionedHillClimbing(A);
+    //     break;
+    // case 13:
+    //     residue = prepartitionedSimulatedAnnealing(A);
+    //     break;
+    // }
+
+    // cout << "heres ya residue: " << residue << endl;
+
+    cout << "TESTING TIME " << endl;
+
+    int nums[7] = {0, 1, 2, 3, 11, 12, 13};
+    for (int i = 0; i < 7; i++)
     {
-    case 0:
-        residue = kkAlgo(A);
-        break;
-    case 1:
-        residue = rrAlgo(A);
-        break;
-    case 2:
-        residue = hillClimbing(A);
-        break;
-    case 3:
-        residue = simulatedAnnealing(A);
-        break;
-    case 11:
-        residue = prepartitionedRR(A);
-        break;
-    case 12:
-        residue = pHillClimbing(A);
-        break;
-    case 13:
-        residue = prepartitionedSimulatedAnnealing(A);
-        break;
+        auto start = steady_clock::now();
+        int residues = 0;
+        for (int j = 0; j < 100; j++)
+        {
+            switch (i)
+            {
+            case 0:
+                residues += kkAlgo(A);
+                break;
+            case 1:
+                residues += rrAlgo(A);
+                break;
+            case 2:
+                residues += hillClimbing(A);
+                break;
+            case 3:
+                residues += simulatedAnnealing(A);
+                break;
+            case 4:
+                residues += prepartitionedRR(A);
+                break;
+            case 5:
+                residues += prepartitionedHillClimbing(A);
+                break;
+            case 6:
+                residues += prepartitionedSimulatedAnnealing(A);
+                break;
+            }
+        }
+        int average = residues / 100;
+        auto end = steady_clock::now();
+        auto elapsed = duration_cast<microseconds>(end - start);
+        auto modified = elapsed.count();
+        cout << i << " average residue: " << average << endl;
+        cout << "total elapsed time: " << modified << endl;
     }
-    cout << "heres ya residue: " << residue << endl;
 }
