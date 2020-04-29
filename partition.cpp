@@ -105,24 +105,17 @@ struct MaxHeap
 
 int kkAlgo(MaxHeap A)
 {
-
     if (A.H.size() == 1)
     {
         int residual = abs(A.H.at(0));
         return residual;
     }
 
-    // pop first two values from maxHeap
     int val1 = A.extractMax();
     int val2 = A.extractMax();
-    // subtract the lesser value from the greater values
     int newVal = val1 - val2;
-    // push that value back into the max heap
     A.push(newVal);
-    // run maxHeap on the new array
     A.maxHeapify(A.H.size());
-    // repeat
-    // when array.size == 0, return the new array
 
     // print A.H for testing as needed
 
@@ -140,36 +133,59 @@ vector<int> randomSignedList()
         else
             S.push_back(1);
     }
+
     return S;
 }
 
-int rrResidue(vector<int> H, vector<int> S)
+int rrResidue(MaxHeap H, vector<int> S)
 {
     int sum = 0;
     for (int i = 0; i < SIZE; i++)
     {
-        sum += H[i] * S[i];
+        sum += H.H[i] * S[i];
     }
+    cout << "sum: " << sum << endl;
     return sum;
 }
 
-int rrAlgo(vector<int> H)
+int rrAlgo(MaxHeap H)
 {
     vector<int> S = randomSignedList();
     int sResidue = rrResidue(H, S);
 
-    for (int i = 0; i < MAX_ITER; i++)
+    for (int i = 0; i < 25000; i++)
     {
         vector<int> sPrime = randomSignedList();
         int sPrimeResidue = rrResidue(H, sPrime);
-        if (sPrimeResidue < sResidue)
+        if (sPrimeResidue == 0)
         {
+            S = sPrime;
             sResidue = sPrimeResidue;
-            if (sResidue == 0)
-                break;
+            break;
+        }
+        if (abs(sPrimeResidue) < abs(sResidue))
+        {
+            S = sPrime;
+            sResidue = sPrimeResidue;
         }
     }
-    return sResidue;
+
+    int bestS = rrResidue(H, S);
+    int bestResidue = abs(bestS);
+    cout << bestResidue << endl;
+
+    /*
+    For testing
+    cout << "The Best S List" << endl;
+    for (int i = 0; i < S.size(); i++)
+    {
+        std::cout << S.at(i) << ' ';
+    }
+    cout << endl; 
+    */
+    return bestResidue;
+
+    //or return S?
 }
 
 vector<int> randomNList()
@@ -201,20 +217,27 @@ int partitioningResidue(vector<int> H, vector<int> p)
     return kkAlgo(A);
 }
 
-int prepartitionedRR(vector<int> H)
+int prepartitionedRR(MaxHeap A)
 {
     vector<int> p = randomNList();
-    int residue = partitioningResidue(H, p);
+    int residue = partitioningResidue(A.H, p);
     for (int i = 0; i < MAX_ITER; i++)
     {
         vector<int> preP = randomNList();
-        int prePResidue = partitioningResidue(H, preP);
+        int prePResidue = partitioningResidue(A.H, preP);
+        if (prePResidue == 0)
+        {
+            p = preP;
+            residue = prePResidue;
+            break;
+        }
         if (prePResidue < residue)
         {
             p = preP;
             residue = prePResidue;
         }
     }
+    cout << "smallestResidue: " << residue << endl;
     return residue;
 }
 
@@ -399,7 +422,7 @@ int main(int argc, char **argv)
         residue = kkAlgo(A);
         break;
     case 1:
-        residue = rrAlgo(A.H);
+        residue = rrAlgo(A);
         break;
     case 2:
         residue = hillClimbing(A);
@@ -408,7 +431,7 @@ int main(int argc, char **argv)
         residue = simulatedAnnealing(A);
         break;
     case 11:
-        residue = prepartitionedRR(A.H);
+        residue = prepartitionedRR(A);
         break;
     case 12:
         residue = pHillClimbing(A);
