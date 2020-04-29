@@ -17,6 +17,10 @@
     "algorithm": "cpp",
     "fstream": "cpp",
     "ostream": "cpp",
+<<<<<<< HEAD
     "random": "cpp"
+=======
+    "chrono": "cpp"
+>>>>>>> TestingBranch
 }
 }

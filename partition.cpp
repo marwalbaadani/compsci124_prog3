@@ -457,7 +457,11 @@ int main(int argc, char **argv)
     //     residue = prepartitionedRR(A);
     //     break;
     // case 12:
+<<<<<<< HEAD
     //     residue = prepartitionedHillClimbing(A);
+=======
+    //     residue = pHillClimbing(A);
+>>>>>>> TestingBranch
     //     break;
     // case 13:
     //     residue = prepartitionedSimulatedAnnealing(A);
@@ -493,7 +497,11 @@ int main(int argc, char **argv)
                 residues += prepartitionedRR(A);
                 break;
             case 5:
+<<<<<<< HEAD
                 residues += prepartitionedHillClimbing(A);
+=======
+                residues += pHillClimbing(A);
+>>>>>>> TestingBranch
                 break;
             case 6:
                 residues += prepartitionedSimulatedAnnealing(A);
@@ -505,6 +513,12 @@ int main(int argc, char **argv)
         auto elapsed = duration_cast<microseconds>(end - start);
         auto modified = elapsed.count();
         cout << i << " average residue: " << average << endl;
+<<<<<<< HEAD
         cout << "total elapsed time: " << modified << endl;
+=======
+        cout << "elapsed.count() time: " << modified << endl;
+        cout << "average elapsed.count() time: " << modified / 10 << endl;
+        cout << endl;
+>>>>>>> TestingBranch
     }
 }
