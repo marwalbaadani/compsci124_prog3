@@ -3,9 +3,12 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <sstream>
 #include <random>
 
 using namespace std;
+int MAX_ITER = 1;
+int SIZE = 10;
 
 struct MaxHeap
 {
@@ -33,12 +36,6 @@ struct MaxHeap
         int temp = H[index1];
         H[index1] = H[index2];
         H[index2] = temp;
-
-        // for (int i = 0; i < H.size(); i++)
-        // {
-        //     std::cout << H.at(i) << ' ';
-        // }
-        // cout << endl;
     }
 
     void insert(int v)
@@ -108,12 +105,10 @@ struct MaxHeap
 
 int kkAlgo(MaxHeap A)
 {
-
     if (A.H.size() == 1)
     {
-        int residue = abs(A.H.at(0));
-        cout << "kkAlgo: " << residue << endl;
-        return residue;
+        int residual = abs(A.H.at(0));
+        return residual;
     }
 
     int val1 = A.extractMax();
@@ -122,25 +117,17 @@ int kkAlgo(MaxHeap A)
     A.push(newVal);
     A.maxHeapify(A.H.size());
 
+    // print A.H for testing as needed
 
-    /* 
-    for testing
-    for (int i = 0; i < A.H.size(); i++)
-    {
-        std::cout << A.H.at(i) << ' ';
-    }
-    cout << endl; 
-    */
-
-    kkAlgo(A);
+    return kkAlgo(A);
 }
 
 vector<int> randomSignedList()
 {
     vector<int> S;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < SIZE; i++)
     {
-        float rando = rand() % 10 + 1;
+        int rando = rand() % 10 + 1;
         if (rando > 5)
             S.push_back(-1);
         else
@@ -153,7 +140,7 @@ vector<int> randomSignedList()
 int rrResidue(MaxHeap H, vector<int> S)
 {
     int sum = 0;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < SIZE; i++)
     {
         sum += H.H[i] * S[i];
     }
@@ -170,11 +157,11 @@ int rrAlgo(MaxHeap H)
     {
         vector<int> sPrime = randomSignedList();
         int sPrimeResidue = rrResidue(H, sPrime);
-        if (sPrimeResidue == 0) 
+        if (sPrimeResidue == 0)
         {
             S = sPrime;
             sResidue = sPrimeResidue;
-            break;            
+            break;
         }
         if (abs(sPrimeResidue) < abs(sResidue))
         {
@@ -201,13 +188,12 @@ int rrAlgo(MaxHeap H)
     //or return S?
 }
 
-
 vector<int> randomNList()
 {
     vector<int> S;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < SIZE; i++)
     {
-        float rando = rand() % 100;
+        int rando = rand() % SIZE;
         S.push_back(rando);
     }
     return S;
@@ -215,13 +201,17 @@ vector<int> randomNList()
 
 int partitioningResidue(vector<int> H, vector<int> p)
 {
-    vector<int> aPrime(100);
-    for (int j = 0; j < 100; j++)
+    vector<int> aPrime(SIZE);
+
+    for (int j = 0; j < SIZE; j++)
     {
-        aPrime[p[j]] = aPrime[p[j]] + H[p[j]];
+        // @josh... this is so weird why would randomNlist ever return something negative?!!! unless....
+        int i = abs(p[j]);
+        aPrime[i] += H[i];
     }
+
     MaxHeap A;
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < SIZE; i++)
         A.push(aPrime[i]);
 
     return kkAlgo(A);
@@ -231,15 +221,15 @@ int prepartitionedRR(MaxHeap A)
 {
     vector<int> p = randomNList();
     int residue = partitioningResidue(A.H, p);
-    for (int i = 0; i < 25000; i++)
+    for (int i = 0; i < MAX_ITER; i++)
     {
         vector<int> preP = randomNList();
         int prePResidue = partitioningResidue(A.H, preP);
-        if (prePResidue == 0) 
+        if (prePResidue == 0)
         {
             p = preP;
             residue = prePResidue;
-            break;            
+            break;
         }
         if (prePResidue < residue)
         {
@@ -251,11 +241,154 @@ int prepartitionedRR(MaxHeap A)
     return residue;
 }
 
+// A random move on this state space can be defined as follows.
+// Choose two random indices i and j from [1,n] with pi ̸= j and set pi to j.
+void neighborPartitioning(vector<int> *p)
+{
+    int i = rand() % SIZE;
+    int j = rand() % SIZE;
+    while (i == j)
+        j = rand() % SIZE;
+    p->at(i) = j;
+}
+
+int pHillClimbing(MaxHeap H)
+{
+    vector<int> p = randomNList();
+
+    int residue = partitioningResidue(H.H, p);
+    for (int i = 0; i < MAX_ITER; i++)
+    {
+        vector<int> p2;
+        for (int i = 0; i < SIZE; i++)
+        {
+            p2.push_back(p[i]);
+        }
+        int prePResidue = partitioningResidue(H.H, p2);
+        if (prePResidue < residue)
+        {
+            residue = prePResidue;
+            p = p2;
+            if (residue == 0)
+            {
+                break;
+            }
+        }
+    }
+    return residue;
+}
+
+void neighbor(vector<int> *p)
+{
+    int i = rand() % SIZE;
+    p->at(i) *= -1;
+    int half = rand() % 10 + 1;
+    if (half > 5)
+    {
+        int j = rand() % SIZE;
+        while (i == j)
+            j = rand() % SIZE;
+
+        p->at(j) *= -1;
+    }
+}
+
+int hillClimbing(MaxHeap H)
+{
+    vector<int> S = randomSignedList();
+    int residue = rrResidue(H.H, S);
+    for (int i = 0; i < MAX_ITER; i++)
+    {
+        vector<int> p2;
+        for (int i = 0; i < SIZE; i++)
+        {
+            p2.push_back(H.H[i]);
+        }
+        neighbor(&p2);
+        int residueP = rrResidue(H.H, p2);
+        if (residueP < residue)
+        {
+            residue = residueP;
+            S = p2;
+            if (residueP == 0)
+                break;
+        }
+    }
+    return residue;
+}
+
+int simulatedAnnealing(MaxHeap H)
+{
+    vector<int> S = randomSignedList();
+    int s2 = rrResidue(H.H, S);
+    vector<int> s3 = S;
+    int s4 = s2;
+    for (int i = 0; i < MAX_ITER; i++)
+    {
+        vector<int> p2;
+        for (int i = 0; i < SIZE; i++)
+        {
+            p2.push_back(s3[i]);
+        }
+        neighbor(&p2);
+        int residueP = rrResidue(H.H, p2);
+        if (residueP < s4 || (rand() < exp(-(residueP - s4) / ((pow(10, 10) * (pow(0.8, floor(i / 300))))))))
+        {
+            s3 = p2;
+            s4 = residueP;
+        }
+        if (s4 < s2)
+        {
+            vector<int> p3;
+            for (int i = 0; i < SIZE; i++)
+            {
+                p3.push_back(s3[i]);
+            }
+            S = p3;
+            s2 = s4;
+        }
+    }
+    return s2;
+}
+int prepartitionedSimulatedAnnealing(MaxHeap H)
+{
+    vector<int> partitioned = randomNList();
+    int s = rrResidue(H.H, partitioned);
+    vector<int> partitioned2 = partitioned;
+    int s2 = s;
+    for (int i = 0; i < MAX_ITER; i++)
+    {
+        vector<int> p3;
+        for (int i = 0; i < SIZE; i++)
+        {
+            p3.push_back(partitioned2[i]);
+        }
+        neighbor(&p3);
+        int residueP = partitioningResidue(H.H, p3);
+        if (residueP < s || rand() < exp(-(residueP - s) / ((pow(10, 10) * (pow(0.8, floor(i / 300)))))))
+        {
+            partitioned2 = p3;
+            s2 = residueP;
+            if (s2 < s)
+            {
+                vector<int> p4;
+                for (int i = 0; i < SIZE; i++)
+                {
+                    p4.push_back(partitioned2[i]);
+                }
+                partitioned = p4;
+                s = s2;
+            }
+        }
+    }
+    return s;
+}
+
 int main(int argc, char **argv)
 {
-    random_device rd;  //Will be used to obtain a seed for the random number engine
-    mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-    uniform_int_distribution<> dis(0.0, pow(10, 12)); 
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis(0.0, pow(10, 12));
 
     int flag = atoi(argv[1]);
     int algo = atoi(argv[2]);
@@ -263,14 +396,8 @@ int main(int argc, char **argv)
 
     MaxHeap A;
 
-    // A.push(2);
-    // A.push(1);
-    // A.push(4);
-    // A.push(3);
-    // A.push(6);
-    // A.push(5);
     ofstream outFile(file);
-    for (int i = 0; i < 100; i++)
+    for (int i = 0; i < SIZE; i++)
     {
         outFile << dis(gen) << endl;
     }
@@ -280,37 +407,38 @@ int main(int argc, char **argv)
     string line;
     ifstream inFile(file);
     int a;
-    while (inFile >> a)
+
+    while (getline(inFile, line))
     {
-        A.push(a);
+        istringstream ss(line);
+        A.push(stol(line));
     }
 
     A.buildHeap();
-
-    /*
-    For Testing
-    cout << "The list of N numbers to partition" << endl;
-    for (int i = 0; i < A.H.size(); i++)
+    int residue = 0;
+    switch (algo)
     {
-        std::cout << A.H.at(i) << ' ';
+    case 0:
+        residue = kkAlgo(A);
+        break;
+    case 1:
+        residue = rrAlgo(A);
+        break;
+    case 2:
+        residue = hillClimbing(A);
+        break;
+    case 3:
+        residue = simulatedAnnealing(A);
+        break;
+    case 11:
+        residue = prepartitionedRR(A);
+        break;
+    case 12:
+        residue = pHillClimbing(A);
+        break;
+    case 13:
+        residue = prepartitionedSimulatedAnnealing(A);
+        break;
     }
-    cout << endl;
-    */
-
-    // pop first two values from maxHeap
-    // subtract the lesser value from the greater values
-    // push that value back into the max heap
-    // run maxHeap on the new array
-    // repeat
-    // when array.size == 0, return the new array
-
-    // sort(vec.begin(), vec.end());
-    // reverse(vec.begin(), vec.end());
-
-    // inFile.close();
-
-    // vector<int> k = randomSignedList();
-    // kkAlgo(A);
-    // rrAlgo(A);
-    prepartitionedRR(A);
+    cout << "heres ya residue: " << residue << endl;
 }
