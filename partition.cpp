@@ -6,6 +6,11 @@
 #include <sstream>
 #include <random>
 #include <cassert>
+#include <chrono>
+#include <cstdlib>
+
+using namespace std::chrono;
+using namespace std;
 
 using namespace std;
 int MAX_ITER = 25000;
@@ -392,29 +397,48 @@ int main(int argc, char **argv)
     A.buildHeap();
 
     long long int residue = 0;
-    switch (algo)
+
+    cout << "TESTING TIME " << endl;
+
+    int nums[7] = {0, 1, 2, 3, 11, 12, 13};
+    for (int i = 0; i < 7; i++)
     {
-    case 0:
-        residue = kkAlgo(A);
-        break;
-    case 1:
-        residue = rrAlgo(A);
-        break;
-    case 2:
-        residue = hillClimbing(A);
-        break;
-    case 3:
-        residue = simulatedAnnealing(A);
-        break;
-    case 11:
-        residue = prepartitionedRR(A);
-        break;
-    case 12:
-        residue = pHillClimbing(A);
-        break;
-    case 13:
-        residue = prepartitionedSimulatedAnnealing(A);
-        break;
+        auto start = steady_clock::now();
+        int residues = 0;
+        for (int j = 0; j < 100; j++)
+        {
+            switch (i)
+            {
+            case 0:
+                residues += kkAlgo(A);
+                break;
+            case 1:
+                residues += rrAlgo(A);
+                break;
+            case 2:
+                residues += hillClimbing(A);
+                break;
+            case 3:
+                residues += simulatedAnnealing(A);
+                break;
+            case 4:
+                residues += prepartitionedRR(A);
+                break;
+            case 5:
+                residues += pHillClimbing(A);
+                break;
+            case 6:
+                residues += prepartitionedSimulatedAnnealing(A);
+                break;
+            }
+        }
+        int average = residues / 100;
+        auto end = steady_clock::now();
+        auto elapsed = duration_cast<microseconds>(end - start);
+        auto modified = elapsed.count();
+        cout << i << " average residue: " << average << endl;
+        cout << "elapsed.count() time: " << modified << endl;
+        cout << "average elapsed.count() time: " << modified / 10 << endl;
+        cout << endl;
     }
-    cout << abs(residue) << endl;
 }
