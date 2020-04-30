@@ -9,24 +9,27 @@
 
 using namespace std;
 int MAX_ITER = 25000;
-int SIZE = 10;
+int SIZE = 100;
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(0.0, 1.0);
 
 struct MaxHeap
 {
     vector<long long int> H;
 
-    int left(long long int i)
+    int left(int i)
     {
         return (2 * i) + 1;
     }
 
-    int right(long long int i)
+    int right(int i)
     {
 
         return (2 * i) + 2;
     }
 
-    int parent(long long int i)
+    int parent(int i)
     {
         return (floor((i - 1) / 2));
     }
@@ -38,13 +41,13 @@ struct MaxHeap
         H[index2] = temp;
     }
 
-    void insert(long long int v)
+    void push(long long int v)
     {
         H.push_back(v);
-        int N = H.size();
-        while (H[parent(N)] < H[N] && H[0] != N)
+        int N = H.size() - 1;
+        while (N != 0 && H[parent(N)] < H[N])
         {
-            swap(H[parent(N)], H[N]);
+            swap(parent(N), N);
             N = parent(N);
         }
     }
@@ -53,7 +56,7 @@ struct MaxHeap
     {
         int l = left(N);
         int r = right(N);
-        long long int largest = -1;
+        long long int largest = N;
 
         if (l < int(H.size()) && H[l] > H[N])
             largest = l;
@@ -66,13 +69,6 @@ struct MaxHeap
             swap(N, largest);
             maxHeapify(largest);
         }
-    }
-
-    void push(int key)
-    {
-        H.push_back(key);
-        int index = H.size() - 1;
-        maxHeapify(index);
     }
 
     long long int extractMax()
@@ -102,13 +98,7 @@ struct MaxHeap
 };
 
 long long int kkAlgo(MaxHeap A)
-{ // print A.H for testing as needed
-    for (int i = 0; i < A.H.size(); i++)
-    {
-        cout << A.H[i] << ' ';
-    }
-    cout << endl;
-
+{
     if (A.H.size() == 1)
     {
         long long int residual = abs(A.H.at(0));
@@ -117,83 +107,66 @@ long long int kkAlgo(MaxHeap A)
 
     long long int val1 = A.extractMax();
     long long int val2 = A.extractMax();
-    long long int newVal = abs(val1 - val2);
+    long long int newVal = val1 - val2;
 
     A.push(newVal);
-    A.buildHeap();
     A.maxHeapify(A.H.size());
 
     return kkAlgo(A);
 }
-vector<long long int> randomSignedList()
+
+vector<int> randomSignedList()
 {
-    vector<long long int> S;
+
+    vector<int> S;
     for (int i = 0; i < SIZE; i++)
     {
-        int rando = rand() % 10;
-        if (rando > 4)
+        float rando = dis(gen);
+        if (rando > .5)
             S.push_back(-1);
         else
             S.push_back(1);
     }
-
     return S;
 }
 
-long long int rrResidue(MaxHeap H, vector<long long int> S)
+long long int rrResidue(MaxHeap H, vector<int> S)
 {
     long long int sum = 0;
     for (int i = 0; i < SIZE; i++)
     {
         sum += H.H[i] * S[i];
     }
-    // cout << "sum: " << sum << endl;
-    return sum;
+    return abs(sum);
 }
 
 long long int rrAlgo(MaxHeap H)
 {
-    vector<long long int> S = randomSignedList();
+    vector<int> S = randomSignedList();
     long long int sResidue = rrResidue(H, S);
 
     for (int i = 0; i < MAX_ITER; i++)
     {
-        vector<long long int> sPrime = randomSignedList();
+
+        vector<int> sPrime = randomSignedList();
         long long int sPrimeResidue = rrResidue(H, sPrime);
-        if (sPrimeResidue == 0)
+        if (sPrimeResidue < sResidue)
         {
-            S = sPrime;
             sResidue = sPrimeResidue;
-            break;
-        }
-        if (abs(sPrimeResidue) < abs(sResidue))
-        {
-            S = sPrime;
-            sResidue = sPrimeResidue;
+            if (sResidue == 0)
+            {
+                break;
+            }
         }
     }
 
-    long long int bestS = rrResidue(H, S);
-    long long int bestResidue = abs(bestS);
-    // cout << bestResidue << endl;
-
-    /*
-    For testing
-    cout << "The Best S List" << endl;
-    for (int i = 0; i < S.size(); i++)
-    {
-        std::cout << S.at(i) << ' ';
-    }
-    cout << endl; 
-    */
-    return bestResidue;
-
-    //or return S?
+    return sResidue;
 }
 
-vector<long long int> randomNList()
+vector<int> randomNList()
 {
-    vector<long long int> S;
+
+    vector<int> S;
     for (int i = 0; i < SIZE; i++)
     {
         int rando = rand() % SIZE;
@@ -202,70 +175,69 @@ vector<long long int> randomNList()
     return S;
 }
 
-long long int partitioningResidue(vector<long long int> H, vector<long long int> p)
+long long int partitioningResidue(vector<long long int> H, vector<int> p)
 {
     vector<long long int> aPrime(SIZE);
-
-    for (int j = 0; j < SIZE; j++)
+    for (int i = 0; i < SIZE; i++)
     {
-        int i = abs(p[j]);
-        aPrime[i] += H[j];
+        aPrime[i] = 0;
+    }
+
+    for (int i = 0; i < SIZE; i++)
+    {
+        aPrime[p[i]] += H[i];
     }
 
     MaxHeap A;
     for (int i = 0; i < SIZE; i++)
         A.push(aPrime[i]);
 
+    A.buildHeap();
+
     return kkAlgo(A);
 }
 
 long long int prepartitionedRR(MaxHeap A)
 {
-    vector<long long int> p = randomNList();
+    vector<int> p = randomNList();
     long long int residue = partitioningResidue(A.H, p);
     for (int i = 0; i < MAX_ITER; i++)
     {
-        vector<long long int> preP = randomNList();
+        vector<int> preP = randomNList();
         long long int prePResidue = partitioningResidue(A.H, preP);
-        if (prePResidue == 0)
-        {
-            p = preP;
-            residue = prePResidue;
-            break;
-        }
         if (prePResidue < residue)
         {
-            p = preP;
             residue = prePResidue;
         }
     }
-    // cout << "smallestResidue: " << residue << endl;
+
     return residue;
 }
 
 // A random move on this state space can be defined as follows.
 // Choose two random indices i and j from [1,n] with pi ̸= j and set pi to j.
-void neighborPartitioning(vector<long long int> *p)
+void neighborPartitioning(vector<int> p)
 {
     int i = rand() % SIZE;
     int j = rand() % SIZE;
     while (i == j)
         j = rand() % SIZE;
-    p->at(i) = j;
+    p.at(i) = j;
 }
 
 long long int pHillClimbing(MaxHeap H)
 {
-    vector<long long int> p = randomNList();
+    vector<int> p = randomNList();
 
     long long int residue = partitioningResidue(H.H, p);
     for (int i = 0; i < MAX_ITER; i++)
     {
-        vector<long long int> p2;
+        vector<int> p2;
         for (int i = 0; i < SIZE; i++)
         {
             p2.push_back(p[i]);
         }
+        neighborPartitioning(p2);
         long long int prePResidue = partitioningResidue(H.H, p2);
         if (prePResidue < residue)
         {
@@ -280,43 +252,42 @@ long long int pHillClimbing(MaxHeap H)
     return residue;
 }
 
-void neighbor(vector<long long int> *p)
+void neighbor(vector<int> p)
 {
     int i = rand() % SIZE;
-    p->at(i) *= -1;
-    int half = rand() % 10;
-    if (half > 4)
+    p.at(i) *= -1;
+    float half = dis(gen);
+    if (half > .5)
     {
         int j = rand() % SIZE;
         while (i == j)
             j = rand() % SIZE;
-
-        p->at(j) *= -1;
+        p.at(j) *= -1;
     }
 }
 
 long long int hillClimbing(MaxHeap H)
 {
-    vector<long long int> S = randomSignedList();
+    vector<int> S = randomSignedList();
+
     long long int residue = rrResidue(H, S);
     for (int i = 0; i < MAX_ITER; i++)
     {
-        vector<long long int> p2;
+        vector<int> p2;
+
         for (int i = 0; i < SIZE; i++)
         {
             p2.push_back(S[i]);
         }
-        neighbor(&p2);
+
+        neighbor(p2);
+
         long long int residueP = rrResidue(H, p2);
         if (residueP < residue)
         {
             residue = residueP;
-            S.clear();
-            for (int i = 0; i < SIZE; i++)
-            {
-                S.push_back(p2[i]);
-            }
-            if (residueP == 0)
+            S = p2;
+            if (residue == 0)
                 break;
         }
     }
@@ -325,92 +296,76 @@ long long int hillClimbing(MaxHeap H)
 
 long long int simulatedAnnealing(MaxHeap H)
 {
-    vector<long long int> S = randomSignedList();
-    long long int s2 = rrResidue(H, S);
-    vector<long long int> s3 = S;
-    long long int s4 = s2;
+    vector<int> S = randomSignedList();
+    long long int S_residue = rrResidue(H, S);
+    vector<int> cur = S;
+    long long int cur_residue = S_residue;
     for (int i = 0; i < MAX_ITER; i++)
     {
-        vector<long long int> p2;
+        vector<int> p;
         for (int i = 0; i < SIZE; i++)
         {
-            p2.push_back(s3[i]);
+            p.push_back(cur[i]);
         }
-        neighbor(&p2);
-        long long int residueP = rrResidue(H, p2);
-        if (residueP < s4 || (rand() < exp(-(residueP - s4) / ((pow(10, 10) * (pow(0.8, floor(i / 300))))))))
+        neighbor(p);
+        long long int residueP = rrResidue(H, p);
+        if (residueP < cur_residue || (dis(gen) < exp(-(residueP - cur_residue) / ((pow(10, 10) * (pow(0.8, floor(i / 300))))))))
         {
-            s3 = p2;
-            s4 = residueP;
+            cur = p;
+            cur_residue = residueP;
         }
-        if (s4 < s2)
+        if (cur_residue < S_residue)
         {
-            vector<long long int> p3;
             for (int i = 0; i < SIZE; i++)
             {
-                p3.push_back(s3[i]);
+                S[i] = cur[i];
             }
-            S = p3;
-            s2 = s4;
+            S_residue = cur_residue;
         }
     }
-    return s2;
+    return S_residue;
 }
+
 long long int prepartitionedSimulatedAnnealing(MaxHeap H)
 {
-    vector<long long int> partitioned = randomNList();
-    long long int s = rrResidue(H, partitioned);
-    vector<long long int> partitioned2 = partitioned;
-    long long int s2 = s;
+    vector<int> S = randomNList();
+    long long int S_residue = partitioningResidue(H.H, S);
+    vector<int> cur = S;
+    long long int cur_residue = S_residue;
     for (int i = 0; i < MAX_ITER; i++)
     {
-        vector<long long int> p3;
+        vector<int> p;
         for (int i = 0; i < SIZE; i++)
         {
-            p3.push_back(partitioned2[i]);
+            p.push_back(cur[i]);
         }
-        neighbor(&p3);
-        long long int residueP = partitioningResidue(H.H, p3);
-        if (residueP < s || rand() < exp(-(residueP - s) / ((pow(10, 10) * (pow(0.8, floor(i / 300)))))))
+        neighbor(p);
+        long long int residueP = partitioningResidue(H.H, p);
+        if (residueP < cur_residue || (dis(gen) < exp(-(residueP - cur_residue) / ((pow(10, 10) * (pow(0.8, floor(i / 300))))))))
         {
-            partitioned2 = p3;
-            s2 = residueP;
-            if (s2 < s)
+            cur = p;
+            cur_residue = residueP;
+        }
+        if (cur_residue < S_residue)
+        {
+            for (int i = 0; i < SIZE; i++)
             {
-                vector<long long int> p4;
-                for (int i = 0; i < SIZE; i++)
-                {
-                    p4.push_back(partitioned2[i]);
-                }
-                partitioned = p4;
-                s = s2;
+                S[i] = cur[i];
             }
+            S_residue = cur_residue;
         }
     }
-    return s;
+    return S_residue;
 }
 
 int main(int argc, char **argv)
 {
-
-    random_device rd;
-    mt19937 gen(rd());
-    long long int num = pow(10, 12);
-    uniform_int_distribution<> dis(1, pow(10, 12));
-
     int flag = atoi(argv[1]);
+    (void)flag;
     int algo = atoi(argv[2]);
     char *file = argv[3];
 
     MaxHeap A;
-
-    ofstream outFile(file);
-    for (int i = 0; i < SIZE; i++)
-    {
-        outFile << dis(gen) << endl;
-    }
-
-    // Close the file
 
     string line;
     ifstream inFile(file);
@@ -419,15 +374,9 @@ int main(int argc, char **argv)
     while (inFile >> a)
     {
         A.push(a);
-        // cout << a << endl;
     }
     inFile.close();
     A.buildHeap();
-    for (int i = 0; i < A.H.size(); i++)
-    {
-        cout << A.H[i] << ' ';
-    }
-    cout << endl;
 
     long long int residue = 0;
     switch (algo)
@@ -456,9 +405,3 @@ int main(int argc, char **argv)
     }
     cout << abs(residue) << endl;
 }
-// print A.H for testing as needed
-// for (int i = 0; i < A.H.size(); i++)
-// {
-//     cout << A.H[i] << ' ';
-// }
-// cout << endl;
