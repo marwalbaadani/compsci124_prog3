@@ -301,7 +301,7 @@ int hillClimbing(MaxHeap H)
         vector<int> p2;
         for (int i = 0; i < SIZE; i++)
         {
-            p2.push_back(H.H[i]);
+            p2.push_back(S[i]);
         }
         neighbor(&p2);
         int residueP = rrResidue(H, p2);
