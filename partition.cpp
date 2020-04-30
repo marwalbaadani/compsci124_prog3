@@ -102,7 +102,13 @@ struct MaxHeap
 };
 
 long long int kkAlgo(MaxHeap A)
-{
+{ // print A.H for testing as needed
+    for (int i = 0; i < A.H.size(); i++)
+    {
+        cout << A.H[i] << ' ';
+    }
+    cout << endl;
+
     if (A.H.size() == 1)
     {
         long long int residual = abs(A.H.at(0));
@@ -114,6 +120,7 @@ long long int kkAlgo(MaxHeap A)
     long long int newVal = abs(val1 - val2);
 
     A.push(newVal);
+    A.buildHeap();
     A.maxHeapify(A.H.size());
 
     return kkAlgo(A);
@@ -389,7 +396,7 @@ int main(int argc, char **argv)
     random_device rd;
     mt19937 gen(rd());
     long long int num = pow(10, 12);
-    uniform_int_distribution<> dis(1, int(num));
+    uniform_int_distribution<> dis(1, pow(10, 12));
 
     int flag = atoi(argv[1]);
     int algo = atoi(argv[2]);
@@ -407,21 +414,20 @@ int main(int argc, char **argv)
 
     string line;
     ifstream inFile(file);
-    // int a;
+    long long int a;
 
-    while (getline(inFile, line))
+    while (inFile >> a)
     {
-
-        istringstream ss(line);
-        A.push(stol(line));
+        A.push(a);
+        // cout << a << endl;
     }
-
+    inFile.close();
     A.buildHeap();
-    // for (int i = 0; i < A.H.size(); i++)
-    // {
-    //     cout << A.H[i] << ' ';
-    // }
-    // cout << endl;
+    for (int i = 0; i < A.H.size(); i++)
+    {
+        cout << A.H[i] << ' ';
+    }
+    cout << endl;
 
     long long int residue = 0;
     switch (algo)
